@@ -1,25 +1,26 @@
 name: Release RefLib
 
-# "Press the release button" = publish a GitHub Release.
-# The tag becomes the package version (v0.2.0 -> 0.2.0).
 on:
   release:
     types: [published]
-  workflow_dispatch:          # also lets you run it manually from the Actions tab
+  workflow_dispatch: 
     inputs:
       version:
-        description: "Package version (e.g. 0.2.0)"
+        description: "Package version"
         required: true
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "8.0.x"
+          dotnet-version: "9.0.x"
 
       - name: Resolve version
         id: ver
@@ -30,13 +31,18 @@ jobs:
             echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
           fi
 
-      # No game on the runner: this packs the committed refs/ stubs.
       - name: Pack
         run: dotnet pack RefLib.csproj -c Release -p:Version=${{ steps.ver.outputs.version }} -o artifacts
+
+      - name: NuGet login (OIDC -> temp key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
 
       - name: Push to NuGet
         run: >
           dotnet nuget push "artifacts/*.nupkg"
-          -k ${{ secrets.NUGET_API_KEY }}
-          -s https://api.nuget.org/v3/index.json
+          --api-key ${{ steps.login.outputs.NUGET_API_KEY }}
+          --source https://api.nuget.org/v3/index.json
           --skip-duplicate
