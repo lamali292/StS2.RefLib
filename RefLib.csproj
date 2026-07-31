@@ -1,0 +1,58 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <!-- ============================================================
+         This project ships nothing of its own. It packs the reference
+         assemblies in refs/ into a compile-only NuGet package.
+           ref/<tfm>/*.dll  -> used at compile time
+           lib/<tfm>/_._    -> intentionally empty (game provides runtime)
+         Regenerate refs/ with tools/update-refs.ps1 when the game updates.
+         ============================================================ -->
+
+    <PropertyGroup>
+        <!-- MUST match the TargetFramework your mod projects use. -->
+        <TargetFramework>net9.0</TargetFramework>
+
+        <!-- We don't compile or ship any assembly of our own. -->
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+        <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+
+        <!-- ref/ without a runtime lib/ is deliberate; silence the warnings. -->
+        <NoWarn>$(NoWarn);NU5128;NU5131</NoWarn>
+        
+        <PackageId>lamali.StS2.RefLib</PackageId>
+        <Version>0.1.0</Version>
+        <Authors>lamali</Authors>
+        <Description>Reference assemblies for Slay the Spire 2 modding (sts2, GodotSharp, 0Harmony). Compile-only — the game supplies the real assemblies at runtime.</Description>
+        <PackageTags>slaythespire2;sts2;modding;reference-assembly</PackageTags>
+        <RepositoryUrl>https://github.com/lamali292/StS2.RefLib</RepositoryUrl>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <!-- NOTE: do not claim a single OSS license here. 0Harmony and GodotSharp
+             are MIT, but sts2 is proprietary game code. Leave license unset or
+             point to a NOTICE that spells out the mixed licensing. -->
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- Compile-time reference assemblies -->
+
+        <!-- Empty runtime placeholder so NuGet is happy but nothing ships to bin -->
+        <None Include="build/_._"           Pack="true" PackagePath="lib/$(TargetFramework)/_._" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include=".github\workflows\release.yml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="refs\" />
+    </ItemGroup>
+
+    <!-- Fail the pack early with a clear message if the stubs are missing. -->
+    <Target Name="CheckRefs" BeforeTargets="Pack">
+        <Error Condition="!Exists('refs/sts2.dll')"       Text="refs/sts2.dll missing. Run tools/update-refs.ps1 first." />
+        <Error Condition="!Exists('refs/GodotSharp.dll')" Text="refs/GodotSharp.dll missing. Run tools/update-refs.ps1 first." />
+        <Error Condition="!Exists('refs/0Harmony.dll')"   Text="refs/0Harmony.dll missing. Run tools/update-refs.ps1 first." />
+    </Target>
+
+</Project>
