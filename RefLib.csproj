@@ -1,39 +1,35 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    
 
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
-        
+
         <IncludeBuildOutput>false</IncludeBuildOutput>
         <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
         <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-        
         <NoWarn>$(NoWarn);NU5128;NU5131</NoWarn>
-        
+
         <PackageId>lamali.StS2.RefLib</PackageId>
         <Version>0.1.0</Version>
         <Authors>lamali</Authors>
-        <Description>Reference assemblies for Slay the Spire 2 modding (sts2, GodotSharp, 0Harmony). Compile-only — the game supplies the real assemblies at runtime.</Description>
+        <Description>Reference assemblies for Slay the Spire 2 modding (sts2, GodotSharp, 0Harmony). Compile-only - the game supplies the real assemblies at runtime.</Description>
         <PackageTags>slaythespire2;sts2;modding;reference-assembly</PackageTags>
         <RepositoryUrl>https://github.com/lamali292/StS2.RefLib</RepositoryUrl>
     </PropertyGroup>
 
+    <!-- THE PACKAGE PAYLOAD: reference assemblies (compile-time) + empty runtime placeholder -->
     <ItemGroup>
+        <None Include="refs/sts2.dll"       Pack="true" PackagePath="ref/$(TargetFramework)/" />
+        <None Include="refs/GodotSharp.dll" Pack="true" PackagePath="ref/$(TargetFramework)/" />
+        <None Include="refs/0Harmony.dll"   Pack="true" PackagePath="ref/$(TargetFramework)/" />
         <None Include="build/_._"           Pack="true" PackagePath="lib/$(TargetFramework)/_._" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Content Include=".github\workflows\release.yml" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="refs\" />
-    </ItemGroup>
-    
+    <!-- Fail the pack early if a stub is missing. -->
     <Target Name="CheckRefs" BeforeTargets="Pack">
         <Error Condition="!Exists('refs/sts2.dll')"       Text="refs/sts2.dll missing. Run tools/update-refs.ps1 first." />
         <Error Condition="!Exists('refs/GodotSharp.dll')" Text="refs/GodotSharp.dll missing. Run tools/update-refs.ps1 first." />
         <Error Condition="!Exists('refs/0Harmony.dll')"   Text="refs/0Harmony.dll missing. Run tools/update-refs.ps1 first." />
     </Target>
+
 </Project>
