@@ -19,10 +19,10 @@
 
     <!-- THE PACKAGE PAYLOAD: reference assemblies (compile-time) + empty runtime placeholder -->
     <ItemGroup>
-        <None Include="refs/sts2.dll"       Pack="true" PackagePath="ref/$(TargetFramework)/" />
-        <None Include="refs/GodotSharp.dll" Pack="true" PackagePath="ref/$(TargetFramework)/" />
-        <None Include="refs/0Harmony.dll"   Pack="true" PackagePath="ref/$(TargetFramework)/" />
         <None Include="build/_._"           Pack="true" PackagePath="lib/$(TargetFramework)/_._" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="refs\" />
     </ItemGroup>
 
     <!-- Fail the pack early if a stub is missing. -->
